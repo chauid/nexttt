@@ -89,6 +89,7 @@ spec:
     post {
         aborted {
             setBuildStatus("The build was aborted by the user.", "Jenkins", "FAILURE")
+            setBuildStatus("skip", "Jenkins11", "SKIPPED")
         }
         failure {
             setBuildStatus("Something went wrong during the build process. Please check the logs for details.", "Jenkins", "FAILURE")
