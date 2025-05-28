@@ -48,19 +48,27 @@ spec:
     stages {
         stage('Init') {
             steps {
-                env.IMAGE_NAME = 'postsmith-hub.kr.ncr.ntruss.com/nexttt'
-                env.IMAGE_TAG = build.getProjectVersion('nodejs')
-                echo "Deploy tag set to: ${env.IMAGE_TAG}"
+                script {
+                    env.IMAGE_NAME = 'postsmith-hub.kr.ncr.ntruss.com/nexttt'
+                    env.IMAGE_TAG = build.getProjectVersion('nodejs')
+                    echo "Deploy tag set to: ${env.IMAGE_TAG}"
+                }
             }
         }
         stage('Build Node.js') {
             steps {
-                build.npm()
+                script {
+                    setBuildStatus("Building Node.js application", "Build Node.js", "PENDING")
+                    build.npm()
+                }
             }
         }
         stage('Build Docker Image') {
             steps {
-                build.image(env.IMAGE_NAME, env.IMAGE_TAG, true)
+                script {
+                    build.image(env.IMAGE_NAME, env.IMAGE_TAG, true)
+                    setBuildStatus("Docker image built successfully", "Build Docker Image", "SUCCESS")
+                }
             }
         }
     }
