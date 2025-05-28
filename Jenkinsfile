@@ -79,7 +79,7 @@ spec:
                     echo "${env.BRANCH_NAME}"
                     setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
                     k8s()
-                    k8s.deploy("nexttt-app-deploy", "default", env.IMAGE_NAME, env.IMAGE_TAG)
+                    k8s.deploy("nexttt-app-deploy", "nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
                     setBuildStatus("Deployment to Kubernetes cluster completed successfully", "CD / Kubernetes rollout", "SUCCESS")
                 }
             }
