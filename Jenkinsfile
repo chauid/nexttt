@@ -28,7 +28,7 @@ spec:
     nodetype: agent
   containers:
   - name: jnlp
-    image: chauid/jenkins-inbound-agent:1.0
+    image: chauid/jenkins-inbound-agent:jdk17-node22-k8s
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
     command:
