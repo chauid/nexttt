@@ -51,14 +51,13 @@ spec:
                 script {
                     env.IMAGE_NAME = 'postsmith-hub.kr.ncr.ntruss.com/nexttt'
                     env.IMAGE_TAG = build.getProjectVersion('nodejs')
-                    echo "1Deploy tag set to: ${env.IMAGE_TAG}"
+                    echo "Deploy tag set to: ${env.IMAGE_TAG}"
                 }
             }
         }
         stage('Build npm') {
             steps {
                 script {
-                    setBuildStatus("skip", "Jenkins11", "SKIPPED")
                     setBuildStatus("Building Next.JS application", "CI / npm build", "PENDING")
                     build.npm()
                     setBuildStatus("Next.JS application built successfully", "CI / npm build", "SUCCESS")
@@ -77,9 +76,7 @@ spec:
         stage('Deploy K8s') {
             steps {
                 script {
-                    echo "${env.BRANCH_NAME}"
                     setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
-                    k8s()
                     k8s.deploy("nexttt-app-deploy", "nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
                     setBuildStatus("Deployment to Kubernetes cluster completed successfully", "CD / Kubernetes rollout", "SUCCESS")
                 }
