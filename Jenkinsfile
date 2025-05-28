@@ -49,6 +49,7 @@ spec:
         stage('Init') {
             steps {
                 script {
+                    echo "${env.GIT_URL}"
                     env.IMAGE_NAME = 'postsmith-hub.kr.ncr.ntruss.com/nexttt'
                     env.IMAGE_TAG = build.getProjectVersion('nodejs')
                     echo "Deploy tag set to: ${env.IMAGE_TAG}"
@@ -77,7 +78,7 @@ spec:
         stage('Deploy K8s') {
             steps {
                 script {
-                    echo "{env.BRANCH_NAME}"
+                    echo "${env.BRANCH_NAME}"
                     setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
                     k8s()
                     k8s.deploy("nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
