@@ -55,19 +55,32 @@ spec:
                 }
             }
         }
-        stage('Build Node.js') {
+        stage('Build npm') {
             steps {
                 script {
-                    setBuildStatus("Building Node.js application", "Build Node.js", "PENDING")
+                    setBuildStatus("Building Next.JS application", "CI / npm build", "PENDING")
                     build.npm()
+                    setBuildStatus("Next.JS application built successfully", "CI / npm build", "SUCCESS")
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
+                    setBuildStatus("Building Docker image", "CI / Docker Build", "PENDING")
                     build.image(env.IMAGE_NAME, env.IMAGE_TAG, true)
-                    setBuildStatus("Docker image built successfully", "Build Docker Image", "SUCCESS")
+                    setBuildStatus("Docker image built successfully", "CI / Docker Build", "SUCCESS")
+                }
+            }
+        }
+
+        stage('Deploy K8s') {
+            steps {
+                script {
+                    setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
+                    k8s()
+                    k8s.deploy("nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
+                    setBuildStatus("Deployment to Kubernetes cluster completed successfully", "CD / Kubernetes rollout", "SUCCESS")
                 }
             }
         }
