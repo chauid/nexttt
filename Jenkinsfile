@@ -49,7 +49,6 @@ spec:
         stage('Init') {
             steps {
                 script {
-                    setBuildStatus("messageeeeeee", "test context", "PENDING")
                     echo "${env.GIT_URL}"
                     env.IMAGE_NAME = 'postsmith-hub.kr.ncr.ntruss.com/nexttt'
                     env.IMAGE_TAG = build.getProjectVersion('nodejs')
