@@ -58,6 +58,7 @@ spec:
         stage('Build npm') {
             steps {
                 script {
+                    setBuildStatus("skip", "Jenkins11", "SKIPPED")
                     setBuildStatus("Building Next.JS application", "CI / npm build", "PENDING")
                     build.npm()
                     setBuildStatus("Next.JS application built successfully", "CI / npm build", "SUCCESS")
@@ -89,7 +90,6 @@ spec:
     post {
         aborted {
             setBuildStatus("The build was aborted by the user.", "Jenkins", "FAILURE")
-            setBuildStatus("skip", "Jenkins11", "SKIPPED")
         }
         failure {
             setBuildStatus("Something went wrong during the build process. Please check the logs for details.", "Jenkins", "FAILURE")
