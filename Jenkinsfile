@@ -77,6 +77,7 @@ spec:
         stage('Deploy K8s') {
             steps {
                 script {
+                    echo "{env.BRANCH_NAME}"
                     setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
                     k8s()
                     k8s.deploy("nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
