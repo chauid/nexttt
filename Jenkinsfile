@@ -73,17 +73,23 @@ spec:
                 }
             }
         }
-
         stage('Deploy K8s') {
             steps {
                 script {
-                    echo "${env.BRANCH_NAME}"
                     setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
-                    k8s()
-                    k8s.deploy("nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
+                    k8s.deploy("nexttt-app-deploy", "nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
                     setBuildStatus("Deployment to Kubernetes cluster completed successfully", "CD / Kubernetes rollout", "SUCCESS")
                 }
             }
+        }
+
+    }
+    post {
+        aborted {
+            setBuildStatus("The build was aborted by the user.", "Jenkins", "FAILURE")
+        }
+        failure {
+            setBuildStatus("Something went wrong during the build process. Please check the logs for details.", "Jenkins", "FAILURE")
         }
     }
 }
