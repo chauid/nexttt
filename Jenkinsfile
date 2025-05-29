@@ -69,16 +69,16 @@ spec:
                 }
             }
         }
-        stage('Build Docker Image') {
+        stage('Build Container Image') {
             when {
                 anyOf { branch 'main'; branch 'PR-*' }
             }
             steps {
                 script {
-                    setBuildStatus("Building Docker image", "CI / Docker Build", "PENDING")
+                    setBuildStatus("Building Container image", "CI / Image Build", "PENDING")
                     env.STAGE_NUMBER = 2
                     build.image(env.IMAGE_NAME, env.IMAGE_TAG, true)
-                    setBuildStatus("Docker image built successfully", "CI / Docker Build", "SUCCESS")
+                    setBuildStatus("Container image built successfully", "CI / Image Build", "SUCCESS")
                 }
             }
         }
@@ -108,7 +108,7 @@ spec:
                         setBuildStatus("Failed to build the Next.JS application.", "CI / npm build", "FAILURE")
                         break
                     case '2':
-                        setBuildStatus("Failed to build the Docker image.", "CI / Docker Build", "FAILURE")
+                        setBuildStatus("Failed to build the Container image.", "CI / Image Build", "FAILURE")
                         break
                     case '3':
                         setBuildStatus("Failed to deploy to Kubernetes cluster.", "CD / Kubernetes rollout", "FAILURE")
