@@ -46,7 +46,7 @@ spec:
     }
 
     options {
-        timeout(time: 40, unit: 'SECONDS')
+        timeout(5)
     }
 
     stages {
