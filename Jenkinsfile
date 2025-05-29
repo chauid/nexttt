@@ -45,6 +45,10 @@ spec:
         }
     }
 
+    options {
+        timeout(time: 10, unit: 'SECONDS')
+    }
+
     stages {
         stage('Init') {
             steps {
@@ -65,6 +69,9 @@ spec:
             }
         }
         stage('Build Docker Image') {
+            when {
+                anyOf { branch 'main'; branch 'PR-*' }
+            }
             steps {
                 script {
                     setBuildStatus("Building Docker image", "CI / Docker Build", "PENDING")
@@ -74,21 +81,21 @@ spec:
             }
         }
         stage('Deploy K8s') {
+            when {
+                anyOf { branch 'main'; branch 'PR-*' }
+            }
             steps {
                 script {
                     setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
                     k8s.deploy("nexttt-app-deploy", "nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
-                    setBuildStatus("Deployment to Kubernetes cluster completed successfully", "CD / Kubernetes rollout", "SUCCESS")
+                    setBuildStatus("Kubernetes cluster Deployed successfully", "CD / Kubernetes rollout", "SUCCESS")
                 }
             }
         }
 
     }
     post {
-        aborted {
-            setBuildStatus("The build was aborted by the user.", "Jenkins", "FAILURE")
-        }
-        failure {
+        unsuccessful {
             setBuildStatus("Something went wrong during the build process. Please check the logs for details.", "Jenkins", "FAILURE")
         }
     }
