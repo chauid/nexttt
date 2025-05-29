@@ -45,13 +45,17 @@ spec:
         }
     }
 
+    options {
+        timeout(5)
+    }
+
     stages {
         stage('Init') {
             steps {
                 script {
+                    env.STAGE_NUMBER = 0
                     env.IMAGE_NAME = 'postsmith-hub.kr.ncr.ntruss.com/nexttt'
                     env.IMAGE_TAG = build.getProjectVersion('nodejs')
-                    echo "Deploy tag set to: ${env.IMAGE_TAG}"
                 }
             }
         }
@@ -59,37 +63,58 @@ spec:
             steps {
                 script {
                     setBuildStatus("Building Next.JS application", "CI / npm build", "PENDING")
+                    env.STAGE_NUMBER = 1
                     build.npm()
                     setBuildStatus("Next.JS application built successfully", "CI / npm build", "SUCCESS")
                 }
             }
         }
         stage('Build Docker Image') {
+            when {
+                anyOf { branch 'main'; branch 'PR-*' }
+            }
             steps {
                 script {
                     setBuildStatus("Building Docker image", "CI / Docker Build", "PENDING")
+                    env.STAGE_NUMBER = 2
                     build.image(env.IMAGE_NAME, env.IMAGE_TAG, true)
                     setBuildStatus("Docker image built successfully", "CI / Docker Build", "SUCCESS")
                 }
             }
         }
         stage('Deploy K8s') {
+            when {
+                anyOf { branch 'main'; branch 'PR-*' }
+            }
             steps {
                 script {
-                    setBuildStatus("Deploying to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
+                    setBuildStatus("Deploy to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
+                    env.STAGE_NUMBER = 3
                     k8s.deploy("nexttt-app-deploy", "nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
-                    setBuildStatus("Deployment to Kubernetes cluster completed successfully", "CD / Kubernetes rollout", "SUCCESS")
+                    setBuildStatus("Kubernetes cluster Deployed successfully", "CD / Kubernetes rollout", "SUCCESS")
                 }
             }
         }
 
     }
     post {
-        aborted {
-            setBuildStatus("The build was aborted by the user.", "Jenkins", "FAILURE")
-        }
-        failure {
-            setBuildStatus("Something went wrong during the build process. Please check the logs for details.", "Jenkins", "FAILURE")
+        unsuccessful {
+            script {
+                switch (env.STAGE_NUMBER) {
+                    case '0':
+                        setBuildStatus("Failed to initialize the build process.", "Jenkins", "FAILURE")
+                        break
+                    case '1':
+                        setBuildStatus("Failed to build the Next.JS application.", "CI / npm build", "FAILURE")
+                        break
+                    case '2':
+                        setBuildStatus("Failed to build the Docker image.", "CI / Docker Build", "FAILURE")
+                        break
+                    case '3':
+                        setBuildStatus("Failed to deploy to Kubernetes cluster.", "CD / Kubernetes rollout", "FAILURE")
+                        break
+                }
+            }
         }
     }
 }
