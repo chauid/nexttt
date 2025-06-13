@@ -51,7 +51,7 @@ spec:
                 script {
                     github.setCommitStatus("Building Next.JS application", "CI / npm build", "PENDING")
                     env.STAGE_NUMBER = 1
-                    build.npm()
+                    build.npm(true)
                     github.setCommitStatus("Next.JS application built successfully", "CI / npm build", "SUCCESS")
                 }
             }
