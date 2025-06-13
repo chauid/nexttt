@@ -1,18 +1,5 @@
 @Library('my-shared-library') _
 
-void setBuildStatus(String message, String context, String state) {
-    step([
-        $class: "GitHubCommitStatusSetter",
-        reposSource: [$class: "ManuallyEnteredRepositorySource", url: env.GIT_URL],
-        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: context],
-        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-        statusResultSource: [
-            $class: "ConditionalStatusResultSource",
-            results: [[$class: "AnyBuildResult", message: message, state: state]]
-        ]
-    ]);
-}
-
 pipeline {
     agent {
         kubernetes {
@@ -62,10 +49,10 @@ spec:
         stage('Build npm') {
             steps {
                 script {
-                    setBuildStatus("Building Next.JS application", "CI / npm build", "PENDING")
+                    github.setCommitStatus("Building Next.JS application", "CI / npm build", "PENDING")
                     env.STAGE_NUMBER = 1
                     build.npm()
-                    setBuildStatus("Next.JS application built successfully", "CI / npm build", "SUCCESS")
+                    github.setCommitStatus("Next.JS application built successfully", "CI / npm build", "SUCCESS")
                 }
             }
         }
@@ -75,10 +62,10 @@ spec:
             }
             steps {
                 script {
-                    setBuildStatus("Building Container image", "CI / Image Build", "PENDING")
+                    github.setCommitStatus("Building Container image", "CI / Image Build", "PENDING")
                     env.STAGE_NUMBER = 2
                     build.image(env.IMAGE_NAME, env.IMAGE_TAG, true)
-                    setBuildStatus("Container image built successfully", "CI / Image Build", "SUCCESS")
+                    github.setCommitStatus("Container image built successfully", "CI / Image Build", "SUCCESS")
                 }
             }
         }
@@ -88,10 +75,10 @@ spec:
             }
             steps {
                 script {
-                    setBuildStatus("Deploy to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
+                    github.setCommitStatus("Deploy to Kubernetes cluster", "CD / Kubernetes rollout", "PENDING")
                     env.STAGE_NUMBER = 3
                     k8s.deploy("nexttt-app-deploy", "nexttt-app", "default", env.IMAGE_NAME, env.IMAGE_TAG)
-                    setBuildStatus("Kubernetes cluster Deployed successfully", "CD / Kubernetes rollout", "SUCCESS")
+                    github.setCommitStatus("Kubernetes cluster Deployed successfully", "CD / Kubernetes rollout", "SUCCESS")
                 }
             }
         }
@@ -102,16 +89,16 @@ spec:
             script {
                 switch (env.STAGE_NUMBER) {
                     case '0':
-                        setBuildStatus("Failed to initialize the build process.", "Jenkins", "FAILURE")
+                        github.setCommitStatus("Failed to initialize the build process.", "Jenkins", "FAILURE")
                         break
                     case '1':
-                        setBuildStatus("Failed to build the Next.JS application.", "CI / npm build", "FAILURE")
+                        github.setCommitStatus("Failed to build the Next.JS application.", "CI / npm build", "FAILURE")
                         break
                     case '2':
-                        setBuildStatus("Failed to build the Container image.", "CI / Image Build", "FAILURE")
+                        github.setCommitStatus("Failed to build the Container image.", "CI / Image Build", "FAILURE")
                         break
                     case '3':
-                        setBuildStatus("Failed to deploy to Kubernetes cluster.", "CD / Kubernetes rollout", "FAILURE")
+                        github.setCommitStatus("Failed to deploy to Kubernetes cluster.", "CD / Kubernetes rollout", "FAILURE")
                         break
                 }
             }
